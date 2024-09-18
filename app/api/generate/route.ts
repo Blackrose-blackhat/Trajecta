@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { auth } from "@/auth";
 import prisma from "@/prisma/prisma";
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   const session = await auth();

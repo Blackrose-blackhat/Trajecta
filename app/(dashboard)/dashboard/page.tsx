@@ -5,7 +5,7 @@ import ReactFlow, { Background, Controls } from "react-flow-renderer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FaLink } from "react-icons/fa";
-import { generateRoadmapData, createNodesAndEdges } from "@/lib/utils";
+import { createNodesAndEdges } from "@/lib/utils";
 import Component from "@/components/ui/3DRender";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
@@ -44,12 +44,11 @@ const nodeTypes = {
 
 const RoadmapPage = () => {
   const { toast } = useToast();
-  const [roadmapData, setRoadmapData] = useState(null);
+  const [roadmapData, setRoadmapData] = useState({ nodes: [], edges: [] });
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasClicked, setHasClicked] = useState(false);
 
-  // Use effect to load roadmap data from localStorage if available
   useEffect(() => {
     const savedRoadmap = localStorage.getItem("roadmapData");
     const savedPrompt = localStorage.getItem("prompt");
@@ -62,7 +61,6 @@ const RoadmapPage = () => {
     }
   }, []);
 
-  // Save roadmap data to localStorage whenever it changes
   useEffect(() => {
     if (roadmapData) {
       localStorage.setItem("roadmapData", JSON.stringify(roadmapData));
@@ -76,13 +74,46 @@ const RoadmapPage = () => {
 
       setIsLoading(true);
       setHasClicked(true);
-      setRoadmapData(null);
+      setRoadmapData({ nodes: [], edges: [] });
 
       try {
-        const { topics, connections } = await generateRoadmapData(prompt);
-        const { nodes, edges } = createNodesAndEdges(topics, connections);
-        setRoadmapData({ nodes, edges });
-        localStorage.setItem("prompt", prompt); // Store the prompt
+        const response = await fetch("/api/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prompt }),
+        });
+
+        if (!response.body) {
+          throw new Error("No response body from API.");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let done = false;
+        let fullText = "";
+
+        while (!done) {
+          const { value, done: readerDone } = await reader.read();
+          done = readerDone;
+          const chunk = decoder.decode(value, { stream: true });
+          fullText += chunk;
+
+          // Process chunk as it's received
+          try {
+            const parsedData = JSON.parse(fullText.trim());
+            const { nodes, edges } = createNodesAndEdges(parsedData.topics, parsedData.connections);
+            setRoadmapData((prevData) => ({
+              nodes: [...prevData.nodes, ...nodes],
+              edges: [...prevData.edges, ...edges],
+            }));
+          } catch (err) {
+            // Ignore JSON parsing errors until the full data is received
+          }
+        }
+
+        localStorage.setItem("prompt", prompt);
       } catch (err) {
         console.error("Error generating roadmap:", err);
         toast({
@@ -99,7 +130,7 @@ const RoadmapPage = () => {
   );
 
   const renderFlowchart = useCallback(() => {
-    if (!roadmapData) return null;
+    if (!roadmapData.nodes.length) return null;
 
     return (
       <motion.div
@@ -129,9 +160,7 @@ const RoadmapPage = () => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         className={`flex ${hasClicked ? 'flex-col-reverse md:flex-row flex-grow gap-4' : 'flex-col items-center'} w-full`}
-
       >
-        
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -171,6 +200,7 @@ const RoadmapPage = () => {
             This is an AI Generated Content and it may be inaccurate sometimes.
           </p>
         </motion.div>
+
         {hasClicked && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -181,8 +211,6 @@ const RoadmapPage = () => {
             {isLoading ? <Component /> : renderFlowchart()}
           </motion.div>
         )}
-
-        
       </motion.div>
     </div>
   );

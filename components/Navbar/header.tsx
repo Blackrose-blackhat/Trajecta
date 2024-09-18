@@ -23,7 +23,7 @@ const Header = async () => {
       <nav className="h-full flex flex-row justify-between items-center">
         <div>
           <Link href="/" className="text-2xl font-semibold">
-            Roadmap Generator
+            TRAJECTA
           </Link>
         </div>
         <ul className="flex items-center space-x-4">
