@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { auth } from "@/auth";
 import prisma from "@/prisma/prisma";
+
 export const maxDuration = 60;
+const maxRetries = 3; // Maximum number of retries
+const retryDelay = 2000; // Delay between retries in milliseconds
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -12,7 +15,7 @@ export async function POST(req: NextRequest) {
   if (!userId) {
     return NextResponse.json(
       { error: "User not found! Please login first." },
-      { status: 401 },
+      { status: 401 }
     );
   }
 
@@ -32,7 +35,7 @@ export async function POST(req: NextRequest) {
     if (!userInfo) {
       return NextResponse.json(
         { error: "User info not found." },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -44,20 +47,12 @@ export async function POST(req: NextRequest) {
       currTimestamp - new Date(userInfo.lastRequestTimestamp).getTime() <
       oneDay
     ) {
-      if (userInfo.requestCount >= parseInt(process.env.LIMIT) ) {
+      if (userInfo.requestCount >= parseInt(process.env.LIMIT)) {
         return NextResponse.json(
           { error: "Request limit exceeded. Try again tomorrow." },
-          { status: 429 },
+          { status: 429 }
         );
       }
-
-      // Increment the request count
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          requestCount: { increment: 1 },
-        },
-      });
     } else {
       // Reset the request count for the new day
       await prisma.user.update({
@@ -96,44 +91,68 @@ Create a flowchart for learning ${prompt} with the following requirements:
 Ensure the response is usable by ReactFlow and includes all necessary details.
 `;
 
-    // Generate content using the GoogleGenerativeAI
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContent(modifiedPrompt);
+    // Retry logic
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        // Generate content using the GoogleGenerativeAI
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const result = await model.generateContent(modifiedPrompt);
 
-    // Assuming the result has content directly
-    console.log("res text", result);
-    const responseText = result.response.text();
-    
-    // Clean up unnecessary characters from the response
-    const cleanedResponseText = responseText
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+        // Assuming the result has content directly
+        console.log("res text", result);
+        const responseText = result.response.text();
+        
+        // Clean up unnecessary characters from the response
+        const cleanedResponseText = responseText
+          .replace(/```json/g, "")
+          .replace(/```/g, "")
+          .trim();
 
-    // Parse the JSON response
-    let flowchartData;
-    try {
-      flowchartData = JSON.parse(cleanedResponseText);
-    } catch (error) {
-      console.error("Failed to parse JSON:", error);
-      return NextResponse.json(
-        { error: "Failed to parse JSON response from generative model." },
-        { status: 400 },
-      );
+        // Validate and parse the JSON response
+        if (!isValidJSON(cleanedResponseText)) {
+          throw new Error("Invalid JSON format");
+        }
+
+        let flowchartData = JSON.parse(cleanedResponseText);
+
+        // Increment the request count after a successful response
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            requestCount: { increment: 1 },
+          },
+        });
+
+        // Return the parsed flowchart data
+        return NextResponse.json({ flowchartData });
+      } catch (error) {
+        if (attempt === maxRetries) {
+          console.error("Final attempt failed:", error);
+          return NextResponse.json(
+            { error: "Failed to process your request after multiple attempts. Please try again later." },
+            { status: 500 }
+          );
+        }
+
+        console.warn(`Attempt ${attempt} failed. Retrying in ${retryDelay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      }
     }
-    // await prisma.generatedData.create({
-    //   data:{
-    //     userId,
-    //     content:flowchartData,
-    //   }
-    // })
-    // Return the parsed flowchart data
-    return NextResponse.json({ flowchartData });
   } catch (error) {
     console.error("Error processing request:", error);
     return NextResponse.json(
       { error: "An internal error occurred." },
-      { status: 500 },
+      { status: 500 }
     );
+  }
+}
+
+// Helper function to validate JSON format
+function isValidJSON(responseText: string): boolean {
+  try {
+    JSON.parse(responseText);
+    return true;
+  } catch {
+    return false;
   }
 }
