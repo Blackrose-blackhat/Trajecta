@@ -114,7 +114,7 @@ function RubiksCube() {
 
 export default function Component() {
   return (
-    <div className="w-1/2 h-full z-10 md:block hidden ">
+    <div className="w-1/2 h-screen z-10 md:block hidden ">
       <Canvas
         camera={{ position: [5, 5, 5], fov: 50 }}
         gl={{ alpha: true }} // Enable transparency

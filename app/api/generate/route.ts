@@ -69,8 +69,7 @@ export async function POST(req: NextRequest) {
 Create a flowchart for learning ${prompt} with the following requirements:
 1. Include key concepts and skills needed to master ${prompt}.
 2. Arrange the concepts in a logical learning order.
-3. For each concept, provide a high-quality learning resource (article, video, or documentation).
-4. Present the output in the following JSON format:
+3. Present the output in the following JSON format:
 {
   "topics": [
     {

@@ -9,9 +9,33 @@ import { generateRoadmapData, createNodesAndEdges } from "@/lib/utils";
 import Component from "@/components/ui/3DRender";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { fetchYouTubeVideos } from "@/actions/Generate.action";
+
 
 const CustomNode = ({ data }) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedResource, setSelectedResource] = useState(null);
+  const [videos,setVideos] = useState(null);
+
   const { label, description = "No description available", resources = [] } = data;
+  
+  
+
+  const handleDialogOpen = useCallback(async (resource) => {
+    const prompt = localStorage.getItem("prompt");
+    setIsDialogOpen(true);
+    console.log("resource", label);
+
+    const videoIds = await fetchYouTubeVideos(label,prompt);
+    console.log("videoIds", videoIds);
+    setVideos(videoIds);
+
+    const videoUrls = videoIds.map(videoId => `https://www.youtube.com/watch?v=${videoId}`);
+    setSelectedResource(videoUrls);
+
+    console.log("Youtube triggered off");
+  }, [label]);
 
   return (
     <div className="p-4 border border-gray-300 rounded-md bg-white shadow-md">
@@ -20,20 +44,49 @@ const CustomNode = ({ data }) => {
       <div>
         {resources.length > 0 ? (
           resources.map((resource, index) => (
-            <a
-              key={index}
-              href={resource}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block text-blue-500 text-sm mb-1 hover:underline"
-            >
-              <FaLink className="inline-block mr-1" /> Resource {index + 1}
-            </a>
+            <span key={index}>
+              <FaLink onClick={() => handleDialogOpen(resource)} className="inline-block mr-1 cursor-pointer text-blue-500" />
+              <button
+                onClick={() => handleDialogOpen(resource)}
+                className="block text-blue-500 text-sm mb-1 hover:underline"
+              >
+                Resource {index + 1}
+              </button>
+            </span>
           ))
         ) : (
           <p className="text-sm text-gray-400">No resources available</p>
         )}
       </div>
+
+      {/* Dialog Component */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{label} - Resource Details</DialogTitle>
+            <DialogDescription>
+              {selectedResource?.map((idx)=> (
+                // <p key={idx.id}><strong>Resource:</strong> </p>
+                // <iframe src={idx} />
+                <div key={idx.id}>
+                  {idx}
+                </div>
+              ))}
+              {/* <p><strong>Resource:</strong> {selectedResource || "No video found"}</p> */}
+              {selectedResource && (
+                <a
+                  href={selectedResource}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline"
+                >
+                  Open Resource
+                </a>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
@@ -49,7 +102,6 @@ const RoadmapPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasClicked, setHasClicked] = useState(false);
 
-  // Use effect to load roadmap data from localStorage if available
   useEffect(() => {
     const savedRoadmap = localStorage.getItem("roadmapData");
     const savedPrompt = localStorage.getItem("prompt");
@@ -62,7 +114,6 @@ const RoadmapPage = () => {
     }
   }, []);
 
-  // Save roadmap data to localStorage whenever it changes
   useEffect(() => {
     if (roadmapData) {
       localStorage.setItem("roadmapData", JSON.stringify(roadmapData));
@@ -82,7 +133,7 @@ const RoadmapPage = () => {
         const { topics, connections } = await generateRoadmapData(prompt);
         const { nodes, edges } = createNodesAndEdges(topics, connections);
         setRoadmapData({ nodes, edges });
-        localStorage.setItem("prompt", prompt); // Store the prompt
+        localStorage.setItem("prompt", prompt);
       } catch (err) {
         console.error("Error generating roadmap:", err);
         toast({
@@ -129,9 +180,7 @@ const RoadmapPage = () => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         className={`flex ${hasClicked ? 'flex-col-reverse md:flex-row flex-grow gap-4' : 'flex-col items-center'} w-full`}
-
       >
-        
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -181,8 +230,6 @@ const RoadmapPage = () => {
             {isLoading ? <Component /> : renderFlowchart()}
           </motion.div>
         )}
-
-        
       </motion.div>
     </div>
   );
