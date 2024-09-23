@@ -16,7 +16,7 @@ import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 const UserProfile = ({ user }) => {
   let router = useRouter();
-  console.log(user);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

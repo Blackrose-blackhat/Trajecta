@@ -1,103 +1,39 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import ReactFlow, { Background, Controls } from "react-flow-renderer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { FaLink } from "react-icons/fa";
+import React, { useState, useCallback, useEffect } from "react";
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  Panel,
+  Node,
+  Edge,
+} from "@xyflow/react";
+
+import "@xyflow/react/dist/style.css";
+
+
 import { generateRoadmapData, createNodesAndEdges } from "@/lib/utils";
 import Component from "@/components/ui/3DRender";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { fetchYouTubeVideos } from "@/actions/Generate.action";
 
-
-const CustomNode = ({ data }) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedResource, setSelectedResource] = useState(null);
-  const [videos,setVideos] = useState(null);
-
-  const { label, description = "No description available", resources = [] } = data;
-  
-  
-
-  const handleDialogOpen = useCallback(async (resource) => {
-    const prompt = localStorage.getItem("prompt");
-    setIsDialogOpen(true);
-    console.log("resource", label);
-
-    const videoIds = await fetchYouTubeVideos(label,prompt);
-    console.log("videoIds", videoIds);
-    setVideos(videoIds);
-
-    const videoUrls = videoIds.map(videoId => `https://www.youtube.com/watch?v=${videoId}`);
-    setSelectedResource(videoUrls);
-
-    console.log("Youtube triggered off");
-  }, [label]);
-
-  return (
-    <div className="p-4 border border-gray-300 rounded-md bg-white shadow-md">
-      <h3 className="font-bold mb-2 text-lg text-gray-800">{label}</h3>
-      <p className="mb-3 text-sm text-gray-600">{description}</p>
-      <div>
-        {resources.length > 0 ? (
-          resources.map((resource, index) => (
-            <span key={index}>
-              <FaLink onClick={() => handleDialogOpen(resource)} className="inline-block mr-1 cursor-pointer text-blue-500" />
-              <button
-                onClick={() => handleDialogOpen(resource)}
-                className="block text-blue-500 text-sm mb-1 hover:underline"
-              >
-                Resource {index + 1}
-              </button>
-            </span>
-          ))
-        ) : (
-          <p className="text-sm text-gray-400">No resources available</p>
-        )}
-      </div>
-
-      {/* Dialog Component */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{label} - Resource Details</DialogTitle>
-            <DialogDescription>
-              {selectedResource?.map((idx)=> (
-                // <p key={idx.id}><strong>Resource:</strong> </p>
-                // <iframe src={idx} />
-                <div key={idx.id}>
-                  {idx}
-                </div>
-              ))}
-              {/* <p><strong>Resource:</strong> {selectedResource || "No video found"}</p> */}
-              {selectedResource && (
-                <a
-                  href={selectedResource}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 hover:underline"
-                >
-                  Open Resource
-                </a>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
+import ResourceSheet from "@/components/ui/Dialogs/ResourceSheet";
+import CustomNode from "@/components/CustomNode";
+import RoadmapForm from "@/components/RoadmapForm";
 
 const nodeTypes = {
   custom: CustomNode,
 };
 
-const RoadmapPage = () => {
+interface RoadmapData {
+  nodes: Node[];
+  edges: Edge[];
+}
+
+const RoadmapPage: React.FC = () => {
   const { toast } = useToast();
-  const [roadmapData, setRoadmapData] = useState(null);
+  const [roadmapData, setRoadmapData] = useState<RoadmapData | null>(null);
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasClicked, setHasClicked] = useState(false);
@@ -121,7 +57,7 @@ const RoadmapPage = () => {
   }, [roadmapData]);
 
   const handleSubmit = useCallback(
-    async (e) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
       if (!prompt.trim()) return;
 
@@ -138,7 +74,10 @@ const RoadmapPage = () => {
         console.error("Error generating roadmap:", err);
         toast({
           title: "An error occurred",
-          description: err.message || "An error occurred while generating the roadmap",
+          description:
+            err instanceof Error
+              ? err.message
+              : "An error occurred while generating the roadmap",
           variant: "destructive",
         });
       } finally {
@@ -168,54 +107,45 @@ const RoadmapPage = () => {
         >
           <Background />
           <Controls />
+          <Panel position="top-right">
+            <ResourceSheet prompt={prompt} />
+          </Panel>
         </ReactFlow>
       </motion.div>
     );
-  }, [roadmapData]);
+  }, [roadmapData, prompt]);
 
   return (
-    <div className={`h-full flex flex-col w-full ${!hasClicked ? 'items-center justify-center' : ''}`}>
+    <div
+      className={`h-full flex flex-col w-full ${
+        !hasClicked ? "items-center justify-center" : ""
+      }`}
+    >
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className={`flex ${hasClicked ? 'flex-col-reverse md:flex-row flex-grow gap-4' : 'flex-col items-center'} w-full`}
+        className={`flex ${
+          hasClicked
+            ? "flex-col-reverse md:flex-row flex-grow gap-4"
+            : "flex-col items-center"
+        } w-full`}
       >
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4 }}
-          className={`${hasClicked ? 'md:w-1/3' : 'w-full max-w-2xl'} space-y-4 ${hasClicked ? 'border rounded-md' : ''} p-5 flex flex-col justify-end`}
+          className={`${
+            hasClicked ? "md:w-1/3" : "w-full max-w-2xl"
+          } space-y-4 ${
+            hasClicked ? "border rounded-md" : ""
+          } p-5 flex flex-col justify-end`}
         >
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Input
-                type="text"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Enter prompt (e.g., Learn Java)"
-                className="w-full"
-                disabled={isLoading}
-              />
-            </motion.div>
-
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full"
-              >
-                {isLoading ? "Generating..." : "Generate Roadmap"}
-              </Button>
-            </motion.div>
-          </form>
+          <RoadmapForm
+            setRoadmapData={setRoadmapData}
+            setHasClicked={setHasClicked}
+            setIsLoading={setIsLoading}
+          />
           <p className="text-sm text-neutral-400 text-center">
             This is an AI Generated Content and it may be inaccurate sometimes.
           </p>

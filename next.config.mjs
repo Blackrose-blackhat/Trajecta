@@ -31,6 +31,11 @@ const nextConfig = {
         
         hostname :"m.youtube.com"
       },
+      {
+        protocol: 'https',
+        
+        hostname :"img.youtube.com"
+      },
       
     ],
   },
