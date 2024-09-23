@@ -38,23 +38,23 @@ const RoadmapPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasClicked, setHasClicked] = useState(false);
 
-  useEffect(() => {
-    const savedRoadmap = localStorage.getItem("roadmapData");
-    const savedPrompt = localStorage.getItem("prompt");
-    if (savedRoadmap) {
-      setRoadmapData(JSON.parse(savedRoadmap));
-      setHasClicked(true);
-    }
-    if (savedPrompt) {
-      setPrompt(savedPrompt);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const savedRoadmap = localStorage.getItem("roadmapData");
+  //   const savedPrompt = localStorage.getItem("prompt");
+  //   if (savedRoadmap) {
+  //     setRoadmapData(JSON.parse(savedRoadmap));
+  //     setHasClicked(true);
+  //   }
+  //   if (savedPrompt) {
+  //     setPrompt(savedPrompt);
+  //   }
+  // }, []);
 
-  useEffect(() => {
-    if (roadmapData) {
-      localStorage.setItem("roadmapData", JSON.stringify(roadmapData));
-    }
-  }, [roadmapData]);
+  // useEffect(() => {
+  //   if (roadmapData) {
+  //     localStorage.setItem("roadmapData", JSON.stringify(roadmapData));
+  //   }
+  // }, [roadmapData]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {

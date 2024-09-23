@@ -6,6 +6,10 @@ import { getUserRoadmaps } from "@/actions/user.action";
 import { Button } from "@/components/ui/button"; // Assuming you have a Button component
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { FaPlus } from "react-icons/fa";
+import { Separator } from "../ui/separator";
+import { Pencil1Icon } from "@radix-ui/react-icons";
+import { SquarePen } from "lucide-react";
 
 interface Roadmap {
   id: string;
@@ -51,7 +55,7 @@ const SideNavbar = () => {
   useEffect(() => {
     if (user?.id) {
       getRoadmap();
-      const intervalId = setInterval(getRoadmap, 60000); // Fetch new data every minute
+      const intervalId = setInterval(getRoadmap, 30000); // Fetch new data every minute
       // Clean up the interval on component unmount
       return () => clearInterval(intervalId);
     }
@@ -62,7 +66,10 @@ const SideNavbar = () => {
   };
 
   return (
-    <nav className="border-r md:w-1/12 w-full p-5 rounded-md justify-end items-center bg-black flex flex-col">
+    <nav className="border-r md:w-2/12 w-full gap-5 p-5 rounded-md justify-end items-center bg-black flex flex-col">
+      {/* <FaPlus className="cursor-pointer" onClick={()=> router.push("/dashboard")} /> */}
+      <SquarePen className="cursor-pointer" onClick={()=> router.push("/dashboard")} />
+      <Separator />
       <div className="flex-1 overflow-y-auto hide-scrollbar w-full">
         {loading ? (
           <div className="text-white">Loading roadmaps...</div>

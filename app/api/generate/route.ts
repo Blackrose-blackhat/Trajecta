@@ -145,7 +145,7 @@ Ensure the response is usable by ReactFlow and includes all necessary details.
         await prisma.generatedRoadmap.create({
           data: {
             userId: userId,
-            content: JSON.stringify(flowchartData),
+            content: flowchartData,
             prompt: prompt,
           },
         });
