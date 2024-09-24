@@ -5,7 +5,7 @@ import prisma from "@/prisma/prisma";
 
 export const maxDuration = 60;
 const maxRetries = 3; // Maximum number of retries
-const retryDelay = 2000; // Delay between retries in milliseconds
+const retryDelay = 1000; // Delay between retries in milliseconds
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       currTimestamp - new Date(userInfo.lastRequestTimestamp).getTime() <
       oneDay
     ) {
-      if (userInfo.requestCount >= parseInt(process.env.LIMIT)) {
+      if (userInfo.requestCount >= parseInt(process.env.LIMIT || "0")) {
         return NextResponse.json(
           { error: "Request limit exceeded. Try again tomorrow." },
           { status: 429 }
@@ -69,6 +69,9 @@ export async function POST(req: NextRequest) {
 Create a flowchart for learning ${prompt} with the following requirements:
 1. Include key concepts and skills needed to master ${prompt}.
 2. Arrange the concepts in a logical learning order.
+4. It should be strictly in the below given format.
+5. Give proper data that covers all the topics of the ${prompt} in depth.
+6, Provide Additional Next steps also after that
 3. Present the output in the following JSON format:
 {
   "topics": [
@@ -81,12 +84,14 @@ Create a flowchart for learning ${prompt} with the following requirements:
     }
   ],
   "projects": [
-    { "project1": "Description", "githubLink": "" }
+    { "name": "" , "description":"" ,   , "level" : "Beginner" , "time taken" : "Average time to complete" }
   ],
   "connections": [
     { "from": "Concept A", "to": "Concept B" }
   ]
 }
+  It is okay if any of the field is missing but at least topics and connections should be present.
+  Be dynamic give response for any prompt
 Ensure the response is usable by ReactFlow and includes all necessary details.
 `;
 
@@ -98,9 +103,9 @@ Ensure the response is usable by ReactFlow and includes all necessary details.
         const result = await model.generateContent(modifiedPrompt);
 
         // Assuming the result has content directly
-        console.log("res text", result);
+
         const responseText = result.response.text();
-        
+
         // Clean up unnecessary characters from the response
         const cleanedResponseText = responseText
           .replace(/```json/g, "")
@@ -122,19 +127,47 @@ Ensure the response is usable by ReactFlow and includes all necessary details.
           },
         });
 
+        await prisma.statistics.upsert({
+          where: { id: 1 }, // Assuming there's only one row in the Statistics table
+          update: {
+            totalRoadmaps: {
+              increment: 1,
+            },
+            // Example field to update
+          },
+          create: {
+            id: 1, // Ensure this matches the unique identifier
+            totalRoadmaps: 1,
+            // Example field to create
+          },
+        });
+
+        await prisma.generatedRoadmap.create({
+          data: {
+            userId: userId,
+            content: flowchartData,
+            prompt: prompt,
+          },
+        });
+
         // Return the parsed flowchart data
         return NextResponse.json({ flowchartData });
       } catch (error) {
         if (attempt === maxRetries) {
           console.error("Final attempt failed:", error);
           return NextResponse.json(
-            { error: "Failed to process your request after multiple attempts. Please try again later." },
+            {
+              error:
+                "Failed to process your request after multiple attempts. Please try again later.",
+            },
             { status: 500 }
           );
         }
 
-        console.warn(`Attempt ${attempt} failed. Retrying in ${retryDelay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        console.warn(
+          `Attempt ${attempt} failed. Retrying in ${retryDelay}ms...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
       }
     }
   } catch (error) {

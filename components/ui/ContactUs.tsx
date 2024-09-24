@@ -16,7 +16,7 @@ export default function ContactUs() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Here you would typically send the data to your server
-    console.log("Submitted:", { email, feedback })
+    
     toast({
       title: "Feedback Sent",
       description: "Thank you for your feedback!",

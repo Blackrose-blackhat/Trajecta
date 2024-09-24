@@ -1,3 +1,4 @@
+import { MarkerType } from "@xyflow/react";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -19,6 +20,9 @@ export const generateRoadmapData = async (prompt) => {
   }
 
   const { topics, connections } = data.flowchartData;
+  const {projects} = data.flowchartData;
+  localStorage.setItem("projects",JSON.stringify(projects));
+
 
   if (!topics || !connections) {
     throw new Error("Invalid roadmap data received");
@@ -28,6 +32,7 @@ export const generateRoadmapData = async (prompt) => {
 };
 
 export const createNodesAndEdges = (topics, connections) => {
+
   const nodes = topics.map((topic, index) => ({
     id: topic.name,
     data: {
@@ -36,7 +41,7 @@ export const createNodesAndEdges = (topics, connections) => {
       resources: topic.resources,
       timeTaken: topic.time_taken,
     },
-    position: { x: index * 250, y: index * 100 },
+    position: { x: 0, y: index * 300 },
     type: "custom",
   }));
 
@@ -44,9 +49,12 @@ export const createNodesAndEdges = (topics, connections) => {
     id: `${connection.from}-${connection.to}`,
     source: connection.from,
     target: connection.to,
-    type: "smoothstep",
-    animated: true,
+    type: 'smoothstep',
+    animated: false,
+  
+   
   }));
 
   return { nodes, edges };
 };
+

@@ -1,48 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 
-
-// Load environment variables
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
+if (!YOUTUBE_API_KEY) {
+  throw new Error("Missing YouTube API key. Please set YOUTUBE_API_KEY in your environment variables.");
+}
 
-
-async function searchYouTube(topic: string , prompt:string): Promise<any> {
- 
-  const query = topic + "in" + " " + prompt;
-  console.log("query is " , query);
+async function searchYouTubeVideos(prompt: string): Promise<string[]> {
   const url = 'https://www.googleapis.com/youtube/v3/search';
   const params = {
     part: 'snippet',
-    q: query,
+    q: prompt,
     type: 'video',
-    maxResults: 3,
+    maxResults: 5,
     key: YOUTUBE_API_KEY,
-    order: 'viewCount',
   };
 
   try {
     const response = await axios.get(url, { params });
-    console.log(response.data.items);
-    return response.data.items; // Return the items array directly
+    const videoIds = response.data.items.map((item: any) => item.id.videoId);
+    return videoIds;
   } catch (error) {
     console.error('Error searching YouTube:', error);
-    throw new Error(error);
+    throw error;
   }
 }
 
+
 export async function POST(req: NextRequest) {
   try {
-    const { topic,prompt } = await req.json();
+    const { prompt } = await req.json();
 
-    if (!topic) {
-      return NextResponse.json({ error: 'Topic is required' }, { status: 400 });
+    if (!prompt) {
+      return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
-    const results = await searchYouTube(topic,prompt);
-    console.log(results);
-    return NextResponse.json(results, { status: 200 });
-  } catch (error:any) {
+    const videoIds = await searchYouTubeVideos(prompt);
+    
+
+    return NextResponse.json({ videoIds }, { status: 200 });
+  } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
