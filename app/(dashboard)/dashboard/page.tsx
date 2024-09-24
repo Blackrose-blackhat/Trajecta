@@ -34,10 +34,17 @@ interface RoadmapData {
 const RoadmapPage: React.FC = () => {
   const { toast } = useToast();
   const [roadmapData, setRoadmapData] = useState<RoadmapData | null>(null);
-  const [prompt, setPrompt] = useState(localStorage.getItem("prompt"));
+  const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasClicked, setHasClicked] = useState(false);
 
+  useEffect(() => {
+    const savedPrompt = localStorage.getItem('prompt');
+    console.log("SavedPrompt is",savedPrompt);
+    if (savedPrompt) {
+      setPrompt(savedPrompt);
+    }
+  }, []);
  
 
   const renderFlowchart = useCallback(() => {
@@ -60,7 +67,7 @@ const RoadmapPage: React.FC = () => {
           <Background />
           <Controls />
           <Panel position="top-right">
-            <ResourceSheet prompt={prompt} />
+            <ResourceSheet />
           </Panel>
         </ReactFlow>
       </motion.div>
