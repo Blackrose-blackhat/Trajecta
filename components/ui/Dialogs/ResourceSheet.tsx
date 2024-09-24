@@ -19,7 +19,8 @@ interface ResourceSheetProps {
   prompt: string;
 }
 
-const ResourceSheet: React.FC<ResourceSheetProps> = ({ prompt }) => {
+const ResourceSheet: React.FC<ResourceSheetProps> = ( {prompt} ) => {
+  console.log(prompt)
   let { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [resource, setResource] = useState(null);

@@ -34,59 +34,11 @@ interface RoadmapData {
 const RoadmapPage: React.FC = () => {
   const { toast } = useToast();
   const [roadmapData, setRoadmapData] = useState<RoadmapData | null>(null);
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState(localStorage.getItem("prompt"));
   const [isLoading, setIsLoading] = useState(false);
   const [hasClicked, setHasClicked] = useState(false);
 
-  // useEffect(() => {
-  //   const savedRoadmap = localStorage.getItem("roadmapData");
-  //   const savedPrompt = localStorage.getItem("prompt");
-  //   if (savedRoadmap) {
-  //     setRoadmapData(JSON.parse(savedRoadmap));
-  //     setHasClicked(true);
-  //   }
-  //   if (savedPrompt) {
-  //     setPrompt(savedPrompt);
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   if (roadmapData) {
-  //     localStorage.setItem("roadmapData", JSON.stringify(roadmapData));
-  //   }
-  // }, [roadmapData]);
-
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!prompt.trim()) return;
-
-      setIsLoading(true);
-      setHasClicked(true);
-      setRoadmapData(null);
-
-      try {
-        const { topics, connections } = await generateRoadmapData(prompt);
-        const { nodes, edges } = createNodesAndEdges(topics, connections);
-        setRoadmapData({ nodes, edges });
-        localStorage.setItem("prompt", prompt);
-      } catch (err) {
-        console.error("Error generating roadmap:", err);
-        toast({
-          title: "An error occurred",
-          description:
-            err instanceof Error
-              ? err.message
-              : "An error occurred while generating the roadmap",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-        setPrompt("");
-      }
-    },
-    [prompt, toast]
-  );
+ 
 
   const renderFlowchart = useCallback(() => {
     if (!roadmapData) return null;

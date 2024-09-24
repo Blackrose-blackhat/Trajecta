@@ -35,6 +35,7 @@ export async function fetchYouTubeVideos(
 
 
 export async function fetchResources(prompt: string): Promise<string[]> {
+  console.log("prompt is ",prompt);
   try {
     const res = await fetch(`${API_BASE_URL}/api/resource`, {
       method: 'POST',

@@ -31,6 +31,7 @@ const RoadmapForm: React.FC<RoadmapFormProps> = ({ setRoadmapData, setIsLoading,
         const { nodes, edges } = createNodesAndEdges(topics, connections);
         setRoadmapData({ nodes, edges });
         localStorage.setItem("prompt", prompt);
+        setPrompt(prompt);
       } catch (err) {
         console.error("Error generating roadmap:", err);
         toast({
@@ -44,7 +45,7 @@ const RoadmapForm: React.FC<RoadmapFormProps> = ({ setRoadmapData, setIsLoading,
       } finally {
         setIsLoading(false);
         setIsLoadingState(false);
-        setPrompt("");
+      
       }
     },
     [prompt, setRoadmapData, setIsLoading, setHasClicked, toast]
