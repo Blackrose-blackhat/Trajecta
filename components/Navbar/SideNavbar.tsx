@@ -68,7 +68,7 @@ const SideNavbar = () => {
   return (
     <nav className="border-r md:w-2/12 w-full gap-5 p-5 rounded-md justify-end items-center bg-black flex flex-col">
       {/* <FaPlus className="cursor-pointer" onClick={()=> router.push("/dashboard")} /> */}
-      <SquarePen className="cursor-pointer" onClick={()=> router.push("/dashboard")} />
+      <SquarePen className="cursor-pointer delay-100 hover:scale-105 " onClick={()=> router.push("/dashboard")} />
       <Separator />
       <div className="flex-1 overflow-y-auto hide-scrollbar w-full">
         {loading ? (
