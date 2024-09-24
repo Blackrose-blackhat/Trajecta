@@ -1,12 +1,13 @@
 "use client";
-import React from "react";
+import React, { Suspense } from "react";
 import { Button } from "./button";
 import Link from "next/link";
 import { FaGoogle } from "react-icons/fa";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { Spinner } from "./Spinner";
 
-const TextEffect = () => {
+const TextEffectContent = () => {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   return (
@@ -32,5 +33,13 @@ const TextEffect = () => {
     </div>
   );
 };
+
+const TextEffect = () => {
+  return(
+    <Suspense fallback={<Spinner />}>
+    <TextEffectContent />
+  </Suspense>
+  )
+}
 
 export default TextEffect;

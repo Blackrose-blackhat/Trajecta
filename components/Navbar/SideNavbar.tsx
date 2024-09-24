@@ -62,7 +62,7 @@ const SideNavbar = () => {
   }, [user?.id]);
 
   const truncatePrompt = (prompt: string) => {
-    return prompt.length > 10 ? `${prompt.substring(0, 10)}...` : prompt;
+    return prompt.length > 10 ? `${prompt.substring(0, 18)}...` : prompt;
   };
 
   return (
@@ -80,7 +80,7 @@ const SideNavbar = () => {
               {/* Add margin-bottom to create space between buttons */}
               <Button
                 variant="outline"
-                className="gap-3"
+                className="gap-3 w-full"
                 onClick={() => handleClick(content)}
               >
                 {truncatePrompt(content.prompt)}
