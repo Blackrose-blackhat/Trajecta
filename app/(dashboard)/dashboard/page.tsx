@@ -12,7 +12,6 @@ import {
 
 import "@xyflow/react/dist/style.css";
 
-
 import { generateRoadmapData, createNodesAndEdges } from "@/lib/utils";
 import Component from "@/components/ui/3DRender";
 import { useToast } from "@/hooks/use-toast";
@@ -21,6 +20,7 @@ import { motion } from "framer-motion";
 import ResourceSheet from "@/components/ui/Dialogs/ResourceSheet";
 import CustomNode from "@/components/CustomNode";
 import RoadmapForm from "@/components/RoadmapForm";
+import { TextHoverEffect } from "@/components/ui/text-hover-effect"; // Import your TextHoverEffect component
 
 const nodeTypes = {
   custom: CustomNode,
@@ -34,11 +34,17 @@ interface RoadmapData {
 const RoadmapPage: React.FC = () => {
   const { toast } = useToast();
   const [roadmapData, setRoadmapData] = useState<RoadmapData | null>(null);
-  const [prompt, setPrompt] = useState(localStorage.getItem("prompt"));
+  const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasClicked, setHasClicked] = useState(false);
 
- 
+  useEffect(() => {
+    const savedPrompt = localStorage.getItem('prompt');
+    console.log("SavedPrompt is", savedPrompt);
+    if (savedPrompt) {
+      setPrompt(savedPrompt);
+    }
+  }, []);
 
   const renderFlowchart = useCallback(() => {
     if (!roadmapData) return null;
@@ -49,7 +55,7 @@ const RoadmapPage: React.FC = () => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.5 }}
-        className="h-full"
+        className="h-full z-10"
       >
         <ReactFlow
           nodes={roadmapData.nodes}
@@ -60,7 +66,7 @@ const RoadmapPage: React.FC = () => {
           <Background />
           <Controls />
           <Panel position="top-right">
-            <ResourceSheet prompt={prompt} />
+            <ResourceSheet />
           </Panel>
         </ReactFlow>
       </motion.div>
@@ -69,26 +75,33 @@ const RoadmapPage: React.FC = () => {
 
   return (
     <div
-      className={`h-full flex flex-col w-full ${
+      className={`h-full flex flex-col w-full relative ${
         !hasClicked ? "items-center justify-center" : ""
       }`}
     >
+      {/* Conditionally render TextHoverEffect when hasClicked is false */}
+      {!hasClicked && (
+        <div className="absolute inset-0 z-0">
+          <TextHoverEffect text="TRAJECTA"  />
+        </div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         className={`flex ${
           hasClicked
-            ? "flex-col-reverse md:flex-row flex-grow gap-4"
-            : "flex-col items-center"
-        } w-full`}
+            ? "flex-col-reverse md:flex-row flex-grow gap-4 "
+            : "flex-col items-center w-fit"
+        } w-full z-10`} // Added z-10 to ensure content is on top of background
       >
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4 }}
           className={`${
-            hasClicked ? "md:w-1/3" : "w-full max-w-2xl"
+            hasClicked ? "md:w-1/3" : "w-full max-w-2xl "
           } space-y-4 ${
             hasClicked ? "border rounded-md" : ""
           } p-5 flex flex-col justify-end`}
@@ -99,7 +112,7 @@ const RoadmapPage: React.FC = () => {
             setIsLoading={setIsLoading}
           />
           <p className="text-sm text-neutral-400 text-center">
-            This is an AI Generated Content and it may be inaccurate sometimes.
+            This is AI Generated Content and may be inaccurate sometimes.
           </p>
         </motion.div>
         {hasClicked && (

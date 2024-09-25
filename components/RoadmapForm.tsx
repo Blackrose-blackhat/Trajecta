@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { generateRoadmapData, createNodesAndEdges } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { Textarea } from "./ui/textarea";
 
 interface RoadmapFormProps {
   setRoadmapData: (data: any) => void;
@@ -52,7 +53,7 @@ const RoadmapForm: React.FC<RoadmapFormProps> = ({ setRoadmapData, setIsLoading,
   );
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 ">
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -63,7 +64,7 @@ const RoadmapForm: React.FC<RoadmapFormProps> = ({ setRoadmapData, setIsLoading,
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Enter prompt (e.g., Learn Java)"
-                className="w-full"
+                className="w-full bg-neutral-900  resize-none"
                 disabled={isLoading}
               />
             </motion.div>

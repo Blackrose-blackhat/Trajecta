@@ -18,6 +18,7 @@ import CustomNode from "@/components/CustomNode";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
+import { useToast } from "@/hooks/use-toast";
 
 interface RoadmapData {
   nodes: Node[];
@@ -30,6 +31,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const [roadmapData, setRoadmapData] = useState<RoadmapData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  let {toast} = useToast();
   const [prompt, setPrompt] = useState("");
   const getRoadmapData = async () => {
     try {
@@ -57,6 +59,23 @@ export default function Page({ params }: { params: { id: string } }) {
   useEffect(() => {
     getRoadmapData();
   }, [params.id]);
+  const handleShareClick = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      toast({
+        title: 'Link copied to clipboard',
+        description: 'You can now share the link with others.',
+        
+      });
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+      toast({
+        title: 'Failed to copy link',
+        description: 'An error occurred while copying the link.',
+        
+      });
+    });
+  };
 
   const renderFlowchart = useCallback(() => {
     if (!roadmapData) return null;
@@ -74,7 +93,7 @@ export default function Page({ params }: { params: { id: string } }) {
           <ResourceSheet prompt={prompt} />
         </Panel>
         <Panel position="top-left">
-          <Button variant="outline" className="rounded-md">
+          <Button variant="outline" className="rounded-md" onClick={handleShareClick}>
             <Upload /> Share
           </Button>
         </Panel>

@@ -15,17 +15,15 @@ import { Spinner } from "../Spinner";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "../separator";
 
-interface ResourceSheetProps {
-  prompt: string;
-}
 
-const ResourceSheet: React.FC<ResourceSheetProps> = ( {prompt} ) => {
-  console.log(prompt)
+
+const ResourceSheet = (  ) => {
+
   let { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [resource, setResource] = useState(null);
   const projects = localStorage.getItem("projects");
-
+  const prompt = localStorage.getItem("prompt");
   const getResources = useCallback(async () => {
     try {
       setLoading(true);
