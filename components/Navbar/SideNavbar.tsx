@@ -1,16 +1,17 @@
-"use client";
+"use client"
 import React, { useEffect, useState } from "react";
-import UserProfile from "../ui/UserProfile";
 import { useSession } from "next-auth/react";
-import { getUserRoadmaps } from "@/actions/user.action";
-import { Button } from "@/components/ui/button"; // Assuming you have a Button component
 import { useRouter } from "next/navigation";
+import { getUserRoadmaps } from "@/actions/user.action";
 import { useToast } from "@/hooks/use-toast";
-import { FaPlus } from "react-icons/fa";
-import { Separator } from "../ui/separator";
-import { Pencil1Icon } from "@radix-ui/react-icons";
-import { SquarePen } from "lucide-react";
+import UserProfile from "../ui/UserProfile";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { SquarePen, Menu } from "lucide-react";
 import { Spinner } from "../ui/Spinner";
+import { truncatePrompt } from "@/lib/utils";
 
 interface Roadmap {
   id: string;
@@ -21,86 +22,102 @@ interface Roadmap {
   prompt: string;
 }
 
-const SideNavbar = () => {
-  let {toast} = useToast();
-  let router = useRouter();
-  const [roadmap, setRoadmap] = useState<Roadmap[]>([]);
+const SheetStyleSidebar = () => {
+  const { toast } = useToast();
+  const router = useRouter();
+  const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRoadmap, setSelectedRoadmap] = useState<Roadmap[]>([]);
   const { data: session } = useSession();
   const user = session?.user;
 
-  const getRoadmap = async () => {
+  const getRoadmaps = async () => {
     try {
       const res = await getUserRoadmaps(user?.id);
-      console.log(res);
-      setRoadmap(res);
+      setRoadmaps(res);
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch roadmaps",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
-    }
-  };
-  const handleClick = (roadmap: Roadmap) => {
-    setSelectedRoadmap(roadmap);
-    try {
-    
-      router.push(`/dashboard/${roadmap.id}`);
-    } catch (error) {
-      toast({
-        title:"An Error occured",
-        description:"Error Occurred"
-      })
     }
   };
 
   useEffect(() => {
     if (user?.id) {
-      getRoadmap();
-      const intervalId = setInterval(getRoadmap, 30000); // Fetch new data every minute
-      // Clean up the interval on component unmount
+      getRoadmaps();
+      const intervalId = setInterval(getRoadmaps, 30000);
       return () => clearInterval(intervalId);
     }
   }, [user?.id]);
 
-  const truncatePrompt = (prompt: string) => {
-    return prompt.length > 10 ? `${prompt.substring(0, 18)}...` : prompt;
+  const handleNewRoadmap = () => {
+    localStorage.removeItem("prompt");
+    localStorage.removeItem("roadmapData");
+    router.push("/dashboard");
+    router.refresh();
   };
 
-  return (
-    <nav className="border-r md:w-2/12 w-full gap-5 p-5 rounded-md justify-end items-center bg-black flex flex-col">
-      {/* <FaPlus className="cursor-pointer" onClick={()=> router.push("/dashboard")} /> */}
-      <SquarePen className="cursor-pointer delay-100 hover:scale-105 " onClick={()=> {
-          localStorage.removeItem("prompt");
-          localStorage.removeItem("roadmapData");
-        router.push("/dashboard");
-        router.refresh();
-        }} />
+  const handleRoadmapClick = (roadmap: Roadmap) => {
+    router.push(`/dashboard/${roadmap.id}`);
+  };
+
+  
+
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between p-4">
+        <h2 className="text-lg font-semibold">Roadmaps</h2>
+        <Button variant="ghost" size="icon" onClick={handleNewRoadmap}>
+          <SquarePen className="h-5 w-5" />
+        </Button>
+      </div>
       <Separator />
-      <div className="flex-1 overflow-y-auto hide-scrollbar w-full">
+      <ScrollArea className="flex-1 px-3">
         {loading ? (
-          <Spinner/>
+          <div className="flex justify-center items-center h-full">
+            <Spinner />
+          </div>
         ) : (
-          roadmap?.map((content, idx) => (
-            <div key={idx} className="mb-3 text-sm text-neutral-300">
-              {" "}
-              {/* Add margin-bottom to create space between buttons */}
-              <Button
-                variant="outline"
-                className="gap-3 w-full"
-                onClick={() => handleClick(content)}
-              >
-                {truncatePrompt(content.prompt)}
-              </Button>
-            </div>
+          roadmaps.map((roadmap) => (
+            <Button
+              key={roadmap.id}
+              variant="ghost"
+              className="w-full justify-start my-1"
+              onClick={() => handleRoadmapClick(roadmap)}
+            >
+              {truncatePrompt(roadmap.prompt)}
+            </Button>
           ))
         )}
-      </div>
-      <div className="flex flex-row w-full justify-center items-center capitalize mt-4">
+      </ScrollArea>
+      <Separator />
+      <div className="p-4">
         <UserProfile user={user} />
       </div>
-    </nav>
+    </div>
+  );
+
+  return (
+    <>
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="icon" className="md:hidden">
+            <Menu />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+          <SidebarContent />
+        </SheetContent>
+      </Sheet>
+      <div className="hidden md:block w-[300px] border-r bg-background">
+        <SidebarContent />
+      </div>
+    </>
   );
 };
 
-export default SideNavbar;
+export default SheetStyleSidebar;

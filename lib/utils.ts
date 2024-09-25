@@ -58,3 +58,6 @@ export const createNodesAndEdges = (topics, connections) => {
   return { nodes, edges };
 };
 
+export const truncatePrompt = (prompt: string) => {
+  return prompt?.length > 18 ? `${prompt.substring(0, 18)}...` : prompt;
+};

@@ -20,15 +20,15 @@ const Page = () => {
         <TextEffect />
         <Model />
       </div>
-      <div className="flex flex-col space-y-5 items-center justify-center">
+      <div className="flex flex-col space-y-5 items-center justify-center p-2">
         <RoadmapGeneratedNumber />
         <Users />
       </div>
       <div className="flex flex-col space-y-10 ">
         {/* <FeaturesSectionDemo /> */}
-        <TestimonialSlider />
-        <Separator />
-        <ContactUs />
+        {/* <TestimonialSlider /> */}
+        {/* <Separator />
+        <ContactUs /> */}
       </div>
     </div>
   );
