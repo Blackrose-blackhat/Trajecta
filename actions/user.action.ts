@@ -51,3 +51,18 @@ export const getUserRoadmaps = async(userId:string) => {
   
   return res;
 }
+
+export const deleteUserHistory = async (userId: string) => {
+  try {
+    // Delete user roadmaps
+    await prisma.generatedRoadmap.deleteMany({
+      where: { userId: userId },
+    });
+
+   
+    console.log(`Successfully deleted history for user with ID: ${userId}`);
+  } catch (error) {
+    console.error(`Error deleting history for user with ID: ${userId}`, error);
+    throw error;
+  }
+};

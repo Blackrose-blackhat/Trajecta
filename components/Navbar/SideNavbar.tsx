@@ -10,6 +10,7 @@ import { FaPlus } from "react-icons/fa";
 import { Separator } from "../ui/separator";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import { SquarePen } from "lucide-react";
+import { Spinner } from "../ui/Spinner";
 
 interface Roadmap {
   id: string;
@@ -43,6 +44,7 @@ const SideNavbar = () => {
   const handleClick = (roadmap: Roadmap) => {
     setSelectedRoadmap(roadmap);
     try {
+    
       router.push(`/dashboard/${roadmap.id}`);
     } catch (error) {
       toast({
@@ -68,11 +70,16 @@ const SideNavbar = () => {
   return (
     <nav className="border-r md:w-2/12 w-full gap-5 p-5 rounded-md justify-end items-center bg-black flex flex-col">
       {/* <FaPlus className="cursor-pointer" onClick={()=> router.push("/dashboard")} /> */}
-      <SquarePen className="cursor-pointer delay-100 hover:scale-105 " onClick={()=> router.push("/dashboard")} />
+      <SquarePen className="cursor-pointer delay-100 hover:scale-105 " onClick={()=> {
+          localStorage.removeItem("prompt");
+          localStorage.removeItem("roadmapData");
+        router.push("/dashboard");
+        router.refresh();
+        }} />
       <Separator />
       <div className="flex-1 overflow-y-auto hide-scrollbar w-full">
         {loading ? (
-          <div className="text-white">Loading roadmaps...</div>
+          <Spinner/>
         ) : (
           roadmap?.map((content, idx) => (
             <div key={idx} className="mb-3 text-sm text-neutral-300">

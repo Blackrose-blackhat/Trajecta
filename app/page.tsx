@@ -25,7 +25,7 @@ const Page = () => {
         <Users />
       </div>
       <div className="flex flex-col space-y-10 ">
-        <FeaturesSectionDemo />
+        {/* <FeaturesSectionDemo /> */}
         <TestimonialSlider />
         <Separator />
         <ContactUs />
