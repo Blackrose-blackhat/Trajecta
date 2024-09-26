@@ -58,7 +58,7 @@ const Header = () => {
             </TooltipProvider>
           </li>
           <li className='border p-2 flex flex-row space-x-5 items-center justify-center gap-5'>
-             <IconCoins /> {token }  {/* Display token */}
+             <IconCoins /> {10-token }  {/* Display token */}
           </li>
         </ul>
       </nav>

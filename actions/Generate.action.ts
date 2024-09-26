@@ -90,3 +90,18 @@ export async function fetchRoadmapById(id: string): Promise<any> {
     throw error;
   }
 }
+
+export async function fetchRoadmap():Promise<any> {
+  try {
+    const roadmapData = await prisma.generatedRoadmap.findMany({
+      take: 3, // Fetch 3 records
+      orderBy: {
+        id: 'asc',
+      },
+    });
+    console.log(roadmapData);
+    return roadmapData;
+  } catch (error) {
+    throw new Error(error);
+  }
+}

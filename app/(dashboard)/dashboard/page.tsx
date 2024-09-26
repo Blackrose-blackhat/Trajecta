@@ -21,6 +21,11 @@ import ResourceSheet from "@/components/ui/Dialogs/ResourceSheet";
 import CustomNode from "@/components/CustomNode";
 import RoadmapForm from "@/components/RoadmapForm";
 import { TextHoverEffect } from "@/components/ui/text-hover-effect"; // Import your TextHoverEffect component
+import { fetchRoadmap } from "@/actions/Generate.action";
+import { IconDropletX } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
+import { LucideMoveUpRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const nodeTypes = {
   custom: CustomNode,
@@ -33,13 +38,26 @@ interface RoadmapData {
 
 const RoadmapPage: React.FC = () => {
   const { toast } = useToast();
+  let router = useRouter();
   const [roadmapData, setRoadmapData] = useState<RoadmapData | null>(null);
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasClicked, setHasClicked] = useState(false);
+  const [randomId, setRoadmapId] = useState([]);
+  const getRandomRoadmap = async () => {
+    try {
+      const res = await fetchRoadmap();
+      setRoadmapId(res);
+      console.log(res);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
-    const savedPrompt = localStorage.getItem('prompt');
+    getRandomRoadmap();
+
+    const savedPrompt = localStorage.getItem("prompt");
     console.log("SavedPrompt is", savedPrompt);
     if (savedPrompt) {
       setPrompt(savedPrompt);
@@ -82,7 +100,7 @@ const RoadmapPage: React.FC = () => {
       {/* Conditionally render TextHoverEffect when hasClicked is false */}
       {!hasClicked && (
         <div className="absolute inset-0 z-0">
-          <TextHoverEffect text="TRAJECTA"  />
+          <TextHoverEffect text="TRAJECTA" />
         </div>
       )}
 
@@ -114,6 +132,21 @@ const RoadmapPage: React.FC = () => {
           <p className="text-sm text-neutral-400 text-center">
             This is AI Generated Content and may be inaccurate sometimes.
           </p>
+
+          <div className="flex flex-row space-x-5">
+            {!hasClicked &&
+              randomId.map((roadmap, idx) => (
+                <div key={idx} className="flex flex-row items-center">
+                  <Button
+                    onClick={() => router.push(`/dashboard/${roadmap?.id}`)}
+                    variant="outline"
+                    className="flex flex-row gap-2 items-center"
+                  >
+                    {roadmap.prompt} <LucideMoveUpRight />
+                  </Button>
+                </div>
+              ))}
+          </div>
         </motion.div>
         {hasClicked && (
           <motion.div
