@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
   if (!userId) {
     return NextResponse.json(
-      { error: "User not found! Please login first." },
+      { error: "User not found! Please logout and retry login!" },
       { status: 401 }
     );
   }
