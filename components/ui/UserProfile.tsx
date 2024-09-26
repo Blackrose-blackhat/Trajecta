@@ -36,7 +36,7 @@ const UserProfile: React.FC = ({ user }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <Button variant="ghost" className="gap-2" >
+        <Button variant="ghost" className="gap-2 p-5 " >
           <div className="relative w-10 h-10">
             <Image
               className="rounded-full cursor-pointer "

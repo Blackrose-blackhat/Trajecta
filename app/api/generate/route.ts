@@ -32,6 +32,39 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const existingRoadmaps = await prisma.generatedRoadmap.findFirst({
+      where:{
+        prompt:prompt.toLowerCase(),
+      },
+    })
+
+    if (existingRoadmaps) {
+      const flowchartData = {
+        flowchartData: existingRoadmaps.content,
+      };
+    
+      return NextResponse.json(flowchartData, {
+        status: 200,
+        statusText: "Found roadmap from DB, no need to generate.",
+      });
+    }
+
+    // if(existingRoadmaps){
+    //    // Clean up unnecessary characters from the response
+    //    const cleanedResponseText = existingRoadmaps
+    //    .replace(/```json/g, "")
+    //    .replace(/```/g, "")
+    //    .trim();
+
+    //  // Validate and parse the JSON response
+    //  if (!isValidJSON(cleanedResponseText)) {
+    //    throw new Error("Invalid JSON format");
+    //  }
+
+    //  let flowchartData = JSON.parse(cleanedResponseText);
+    //   return NextResponse.json(existingRoadmaps,{status:200})
+    // }
+
     if (!userInfo) {
       return NextResponse.json(
         { error: "User info not found." },
@@ -141,12 +174,13 @@ Ensure the response is usable by ReactFlow and includes all necessary details.
             // Example field to create
           },
         });
+        const SavedPrompt = prompt.toLowerCase();
 
         await prisma.generatedRoadmap.create({
           data: {
             userId: userId,
             content: flowchartData,
-            prompt: prompt,
+            prompt: SavedPrompt,
           },
         });
 
