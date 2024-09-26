@@ -82,7 +82,7 @@ const RoadmapPage: React.FC = () => {
           fitView
         >
           <Background />
-          <Controls />
+          
           <Panel position="top-right">
             <ResourceSheet />
           </Panel>
