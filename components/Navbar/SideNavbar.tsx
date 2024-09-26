@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -27,6 +27,7 @@ const SheetStyleSidebar = () => {
   const router = useRouter();
   const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeRoadmapId, setActiveRoadmapId] = useState(null);
   const { data: session } = useSession();
   const user = session?.user;
 
@@ -62,6 +63,7 @@ const SheetStyleSidebar = () => {
   };
 
   const handleRoadmapClick = (roadmap: Roadmap) => {
+    setActiveRoadmapId(roadmap.id);
     router.push(`/dashboard/${roadmap.id}`);
   };
 
@@ -73,22 +75,34 @@ const SheetStyleSidebar = () => {
     const sevenDaysAgo = new Date(today);
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    return roadmaps.reduce((acc, roadmap) => {
-      const createdAt = new Date(roadmap.createdAt);
-      if (createdAt >= today) {
-        acc.today.push(roadmap);
-      } else if (createdAt >= yesterday) {
-        acc.yesterday.push(roadmap);
-      } else if (createdAt >= sevenDaysAgo) {
-        acc.pastWeek.push(roadmap);
-      } else {
-        acc.older.push(roadmap);
-      }
-      return acc;
-    }, { today: [], yesterday: [], pastWeek: [], older: [] } as Record<string, Roadmap[]>);
+    return roadmaps.reduce(
+      (acc, roadmap) => {
+        const createdAt = new Date(roadmap.createdAt);
+        if (createdAt >= today) {
+          acc.today.push(roadmap);
+        } else if (createdAt >= yesterday) {
+          acc.yesterday.push(roadmap);
+        } else if (createdAt >= sevenDaysAgo) {
+          acc.pastWeek.push(roadmap);
+        } else {
+          acc.older.push(roadmap);
+        }
+        return acc;
+      },
+      { today: [], yesterday: [], pastWeek: [], older: [] } as Record<
+        string,
+        Roadmap[]
+      >
+    );
   };
 
-  const RoadmapList = ({ roadmaps, title }: { roadmaps: Roadmap[], title: string }) => {
+  const RoadmapList = ({
+    roadmaps,
+    title,
+  }: {
+    roadmaps: Roadmap[];
+    title: string;
+  }) => {
     if (roadmaps.length === 0) return null;
 
     return (
@@ -99,7 +113,9 @@ const SheetStyleSidebar = () => {
           <Button
             key={roadmap.id}
             variant="ghost"
-            className="w-full justify-start my-1 text-neutral-400"
+            className={`${
+              activeRoadmapId === roadmap.id ? "bg-neutral-500/20 text-white" : ""
+            }  w-full justify-start my-1 text-neutral-400`}
             onClick={() => handleRoadmapClick(roadmap)}
           >
             {truncatePrompt(roadmap.prompt)}
@@ -119,7 +135,7 @@ const SheetStyleSidebar = () => {
             <SquarePen className="h-5 w-5" />
           </Button>
         </div>
-        
+
         <ScrollArea className="flex-1 px-3">
           {loading ? (
             <div className="flex justify-center flex-col items-center h-[70vh]">
@@ -128,8 +144,14 @@ const SheetStyleSidebar = () => {
           ) : (
             <>
               <RoadmapList roadmaps={organizedRoadmaps.today} title="Today" />
-              <RoadmapList roadmaps={organizedRoadmaps.yesterday} title="Yesterday" />
-              <RoadmapList roadmaps={organizedRoadmaps.pastWeek} title="Past 7 Days" />
+              <RoadmapList
+                roadmaps={organizedRoadmaps.yesterday}
+                title="Yesterday"
+              />
+              <RoadmapList
+                roadmaps={organizedRoadmaps.pastWeek}
+                title="Past 7 Days"
+              />
               <RoadmapList roadmaps={organizedRoadmaps.older} title="Older" />
             </>
           )}
