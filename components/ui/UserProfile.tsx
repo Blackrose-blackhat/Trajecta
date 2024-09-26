@@ -19,6 +19,8 @@ import {
 } from "./dialog";
 import UserProfleDialog from "./Dialogs/UserProfleDialog";
 import { Separator } from "./separator";
+import { Button } from "./button";
+import { truncatePrompt } from "@/lib/utils";
 
 const UserProfile: React.FC = ({ user }) => {
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
@@ -34,7 +36,8 @@ const UserProfile: React.FC = ({ user }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-      <div className="relative w-10 h-10">
+        <Button variant="ghost" className="gap-2 p-5 " >
+          <div className="relative w-10 h-10">
             <Image
               className="rounded-full cursor-pointer "
               src={user?.image}
@@ -42,6 +45,8 @@ const UserProfile: React.FC = ({ user }) => {
               fill
             />
           </div>
+        {truncatePrompt( user?.email)}
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -67,10 +72,8 @@ const UserProfile: React.FC = ({ user }) => {
           <DialogTitle>Profile</DialogTitle>
           <Separator />
           <DialogDescription>
-           
-           <UserProfleDialog user={user} />
+            <UserProfleDialog user={user} />
           </DialogDescription>
-         
         </DialogContent>
       </Dialog>
     </DropdownMenu>

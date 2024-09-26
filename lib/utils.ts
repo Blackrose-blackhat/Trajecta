@@ -14,11 +14,11 @@ export const generateRoadmapData = async (prompt) => {
   });
 
   const data = await response.json();
-
+  console.log(data);
   if (!response.ok) {
     throw new Error(data.error || "Failed to generate roadmap");
   }
-
+  console.log(data.flowchart);
   const { topics, connections } = data.flowchartData;
   const {projects} = data.flowchartData;
   localStorage.setItem("projects",JSON.stringify(projects));
@@ -58,3 +58,6 @@ export const createNodesAndEdges = (topics, connections) => {
   return { nodes, edges };
 };
 
+export const truncatePrompt = (prompt: string) => {
+  return prompt?.length > 18 ? `${prompt.substring(0, 18)}...` : prompt;
+};
