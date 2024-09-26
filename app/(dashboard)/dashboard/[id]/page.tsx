@@ -88,7 +88,7 @@ export default function Page({ params }: { params: { id: string } }) {
         nodeTypes={nodeTypes}
       >
         <Background />
-        <Controls />
+      
         <Panel position="top-right">
           <ResourceSheet prompt={prompt} />
         </Panel>

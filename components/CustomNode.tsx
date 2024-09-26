@@ -10,11 +10,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useCallback, useState } from "react";
 import { Button } from "./ui/button";
 import { Spinner } from "./ui/Spinner";
+import { ScrollArea } from "./ui/scroll-area";
 interface CustomNodeData {
   label: string;
   description?: string;
 }
-
 
 const CustomNode: React.FC<{ data: CustomNodeData }> = ({ data }) => {
   let { toast } = useToast();
@@ -35,7 +35,7 @@ const CustomNode: React.FC<{ data: CustomNodeData }> = ({ data }) => {
 
     try {
       const videoIds = await fetchYouTubeVideos(label, prompt || "");
-      console.log(videoIds)
+      console.log(videoIds);
       setVideos(videoIds);
 
       const videoUrls = videoIds.map(
@@ -55,7 +55,6 @@ const CustomNode: React.FC<{ data: CustomNodeData }> = ({ data }) => {
       setIsDialogOpen(false);
     } finally {
       setIsLoading(false);
-    
     }
   }, [label]);
 
@@ -87,20 +86,21 @@ const CustomNode: React.FC<{ data: CustomNodeData }> = ({ data }) => {
                     : url;
 
                   return (
-                    <div key={index} className="w-full aspect-w-16 aspect-h-9">
-                      <iframe
-                        src={embedUrl}
-                        className="w-full h-full"
-                        frameBorder="0"
-                        allowFullScreen
-                      />
-                    </div>
+                    <ScrollArea key={index}>
+                      <div className="w-full aspect-w-16 aspect-h-9">
+                        <iframe
+                          src={embedUrl}
+                          className="w-full h-full"
+                          frameBorder="0"
+                          allowFullScreen
+                        />
+                      </div>
+                    </ScrollArea>
                   );
                 })
               )}
 
               {/* TODO:add resources like ebooks or wiki links */}
-             
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
@@ -109,4 +109,4 @@ const CustomNode: React.FC<{ data: CustomNodeData }> = ({ data }) => {
   );
 };
 
-export default CustomNode
+export default CustomNode;
