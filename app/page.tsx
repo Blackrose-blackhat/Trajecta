@@ -13,10 +13,11 @@ import React from "react";
 
 const Page = () => {
   return (
-    <div className="w-full flex flex-col items-center ">
+    <div className="w-full flex flex-col items-center   ">
       <Spotlight />
       <Header />
-      <div className="flex flex-row max-h-screen w-full md:justify-between justify-center items-center p-5 ">
+     <div className="flex flex-col h-[90vh] w-full justify-between ">
+     <div className="flex flex-row lg:max-h-screen h-full w-full lg:justify-between justify-center items-center p-5 ">
         <TextEffect />
         <Model />
       </div>
@@ -24,6 +25,7 @@ const Page = () => {
         <RoadmapGeneratedNumber />
         <Users />
       </div>
+     </div>
       <div className="flex flex-col space-y-10 ">
         {/* <FeaturesSectionDemo /> */}
         {/* <TestimonialSlider /> */}

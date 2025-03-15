@@ -75,3 +75,7 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+.p-responsive{
+  padding-left: 50px;
+  padding-right: 50px;
+}

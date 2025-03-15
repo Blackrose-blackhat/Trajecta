@@ -35,7 +35,7 @@ export default function RootLayout({
             <SessionProvider>
               <div className="flex flex-col h-screen w-full ">
                 <Header />
-                <div className="w-full h-[90vh] flex flex-row   gap-5">
+                <div className="w-full h-screen flex flex-row   gap-5">
                   <SideNavbar />
                   <div className="w-full p-5">
                     

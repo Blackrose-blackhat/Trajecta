@@ -15,7 +15,7 @@ const Users = () => {
         getUsers();
     },[])
   return (
-    <div>
+    <div className='p-responsive'>
     
       <AvatarGroup people={users} />
     </div>

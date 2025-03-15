@@ -4,7 +4,7 @@ import { getTokens, logoutAction } from "@/actions/user.action";
 import { auth, signOut } from "@/auth";
 import Link from "next/link";
 import { Spotlight } from "../ui/spotlight";
-import { 
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -12,8 +12,11 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from '../ui/button';
 import { IconCoins } from '@tabler/icons-react';
+import { useSession } from 'next-auth/react';
 
 const Header = () => {
+  const session = useSession();
+  console.log(session?.status);
   const [token, setToken] = useState(null);
 
   // Function to fetch and update the tokens
@@ -29,9 +32,9 @@ const Header = () => {
     generateToken();
 
     // Set interval to refresh tokens every 5 minutes (300000 ms)
-      // Adjust time based on your requirement
+    // Adjust time based on your requirement
 
-  
+
   }, []);
 
   return (
@@ -57,9 +60,10 @@ const Header = () => {
               </Tooltip>
             </TooltipProvider>
           </li>
-          <li className='border p-2 flex flex-row space-x-5 items-center justify-center gap-5'>
-             <IconCoins /> {10-token }  {/* Display token */}
-          </li>
+          {session?.status !== "unauthenticated" ? <li className='border p-2 flex flex-row space-x-5 items-center justify-center gap-5'>
+            <IconCoins /> {10 - token}  {/* Display token */}
+          </li> : <></>}
+
         </ul>
       </nav>
     </header>

@@ -14,8 +14,8 @@ interface AvatarGroupProps {
 }
 
 const AvatarGroup: React.FC<AvatarGroupProps> = ({ people }) => {
-  const displayedPeople = people?.slice(0, 10);
-  const remainingCount = people?.length - 10;
+  const displayedPeople = people?.slice(0, 7);
+  const remainingCount = people?.length - 7;
 
   return (
     <div className="flex -space-x-2">

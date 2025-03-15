@@ -132,7 +132,7 @@ Ensure the response is usable by ReactFlow and includes all necessary details.
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         // Generate content using the GoogleGenerativeAI
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
         const result = await model.generateContent(modifiedPrompt);
 
         // Assuming the result has content directly

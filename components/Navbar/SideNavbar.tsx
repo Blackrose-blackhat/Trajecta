@@ -129,7 +129,7 @@ const SheetStyleSidebar = () => {
     const organizedRoadmaps = organizeRoadmapsByDate(roadmaps);
 
     return (
-      <div className="flex flex-col h-full bg-black">
+      <div className="flex flex-col h-screen bg-black">
         <div className="flex items-center justify-end p-4">
           <Button variant="ghost" size="icon" onClick={handleNewRoadmap}>
             <SquarePen className="h-5 w-5" />
@@ -176,7 +176,7 @@ const SheetStyleSidebar = () => {
           <SidebarContent />
         </SheetContent>
       </Sheet>
-      <div className="hidden md:block w-[300px] border-r bg-background">
+      <div className="hidden md:block w-[300px] border-r h-screen bg-red-500">
         <SidebarContent />
       </div>
     </>

@@ -136,7 +136,7 @@ const RoadmapPage: React.FC = () => {
           <div className="flex flex-row space-x-5">
             {!hasClicked &&
               randomId.map((roadmap, idx) => (
-                <div key={idx} className="flex flex-row items-center">
+                <div key={idx} className="flex flex-row hidden md:block items-center">
                   <Button
                     onClick={() => router.push(`/dashboard/${roadmap?.id}`)}
                     variant="outline"
